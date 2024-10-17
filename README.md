@@ -1,6 +1,7 @@
 ### Team Members
 - **Chunyu Sui**, cs4480
-- **Huiyuan Li**,
+- **Huiyuan Li**, hl3700
+  
 
 ### Sample out put
 This is the screenshot of running the lexer program, you can refer to it to have a 
