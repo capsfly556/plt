@@ -15,16 +15,37 @@ public class Lexer {
     private static final Set<String> OPERATORS = new HashSet<>(Arrays.asList("+", "-", "*", "/", "==", "!="));
 
     // Define delimiters
-    private static final Set<Character> DELIMITERS = new HashSet<>(Arrays.asList(';', ',', '(', ')'));
+    private static final Set<Character> DELIMITERS = new HashSet<>(Arrays.asList(';', ',', '(', ')', '{', '}'));
 
     public static void main(String[] args) {
-        // Sample input program (in real case, this would come from an input file)
-        String input = "if (x == 10) return x;";
+        // Store multiple input programs for testing in a list
+        List<String> inputs = Arrays.asList(
+                // Example 1: Simple Conditional Statement
+                "if (x == 5) {\n    return x + 1;\n}",
 
-        // Run the lexer
-        List<Token> tokens = scan(input);
+                // Example 2: Loop with an Error (Unrecognized Symbol)
+                "while (y != 10) {\n    y = y * 2 @ 3;\n}",
 
-        // Print the tokens
+                // Example 3: Function Declaration and Call with Identifiers
+                "int add(int a, int b) {\n    return a + b;\n}\nadd(2, 3);",
+
+                // Example 4: Multiple Operators and Delimiters
+                "x = y + (z * 2) - 1;",
+
+                // Example 5: String with an Unrecognized Token (Lexical Error)
+                "if (a == 100) {\n    result = a + #;\n}"
+        );
+
+        // Loop through each input program, scan tokens, and print the result
+        for (int i = 0; i < inputs.size(); i++) {
+            System.out.println("Example " + (i + 1) + " Tokens:");
+            printTokens(scan(inputs.get(i)));
+            System.out.println(); // Add space between examples
+        }
+    }
+
+    // Method to print the tokens
+    private static void printTokens(List<Token> tokens) {
         for (Token token : tokens) {
             System.out.println(token);
         }
