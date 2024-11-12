@@ -5,53 +5,49 @@ import java.util.*;
 public class Lexer {
     // Define token types
     enum TokenType {
-        KEYWORD, IDENTIFIER, OPERATOR, LITERAL, DELIMITER, ERROR
+        // Keywords
+        IF,
+
+        // Operators
+        PLUS, MINUS, MULTIPLY, DIVIDE, ASSIGN,
+
+        // Delimiters
+        SEMICOLON, LPAREN, RPAREN, LBRACE, RBRACE,
+
+        // Identifiers and literals
+        IDENTIFIER, LITERAL,
+
+        // Errors and end of file
+        ERROR, EOF
     }
 
-    // Define keywords
-    private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList("if", "else", "while", "return"));
-
-    // Define operators
-    private static final Set<String> OPERATORS = new HashSet<>(Arrays.asList("+", "-", "*", "/", "==", "!="));
-
-    // Define delimiters
-    private static final Set<Character> DELIMITERS = new HashSet<>(Arrays.asList(';', ',', '(', ')', '{', '}'));
-
-    public static void main(String[] args) {
-        // Store multiple input programs for testing in a list
-        List<String> inputs = Arrays.asList(
-                // Example 1: Simple Conditional Statement
-                "if (x == 5) {\n    return x + 1;\n}",
-
-                // Example 2: Loop with an Error (Unrecognized Symbol)
-                "while (y != 10) {\n    y = y * 2 @ 3;\n}",
-
-                // Example 3: Function Declaration and Call with Identifiers
-                "int add(int a, int b) {\n    return a + b;\n}\nadd(2, 3);",
-
-                // Example 4: Multiple Operators and Delimiters
-                "x = y + (z * 2) - 1;",
-
-                // Example 5: String with an Unrecognized Token (Lexical Error)
-                "if (a == 100) {\n    result = a + #;\n}"
-        );
-
-        // Loop through each input program, scan tokens, and print the result
-        for (int i = 0; i < inputs.size(); i++) {
-            System.out.println("Example " + (i + 1) + " Tokens:");
-            printTokens(scan(inputs.get(i)));
-            System.out.println(); // Add space between examples
-        }
+    // Keyword mapping
+    private static final Map<String, TokenType> KEYWORDS = new HashMap<>();
+    static {
+        KEYWORDS.put("if", TokenType.IF);
     }
 
-    // Method to print the tokens
-    private static void printTokens(List<Token> tokens) {
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
+    // Operator mapping
+    private static final Map<String, TokenType> OPERATORS = new HashMap<>();
+    static {
+        OPERATORS.put("+", TokenType.PLUS);
+        OPERATORS.put("-", TokenType.MINUS);
+        OPERATORS.put("*", TokenType.MULTIPLY);
+        OPERATORS.put("/", TokenType.DIVIDE);
+        OPERATORS.put("=", TokenType.ASSIGN);
     }
 
-    // Token class to hold token type and value
+    // Delimiter mapping
+    private static final Map<Character, TokenType> DELIMITERS = new HashMap<>();
+    static {
+        DELIMITERS.put(';', TokenType.SEMICOLON);
+        DELIMITERS.put('(', TokenType.LPAREN);
+        DELIMITERS.put(')', TokenType.RPAREN);
+        DELIMITERS.put('{', TokenType.LBRACE);
+        DELIMITERS.put('}', TokenType.RBRACE);
+    }
+
+    // Token class
     static class Token {
         TokenType type;
         String value;
@@ -63,11 +59,11 @@ public class Lexer {
 
         @Override
         public String toString() {
-            return "<" + type + ", " + value + ">";
+            return "<" + type + ", '" + value + "'>";
         }
     }
 
-    // Main scanning function
+    // Scanning function
     public static List<Token> scan(String input) {
         List<Token> tokens = new ArrayList<>();
         int length = input.length();
@@ -85,13 +81,13 @@ public class Lexer {
             // Handle keywords or identifiers
             if (Character.isLetter(current)) {
                 StringBuilder sb = new StringBuilder();
-                while (i < length && (Character.isLetterOrDigit(input.charAt(i)))) {
+                while (i < length && Character.isLetterOrDigit(input.charAt(i))) {
                     sb.append(input.charAt(i));
                     i++;
                 }
                 String word = sb.toString();
-                if (KEYWORDS.contains(word)) {
-                    tokens.add(new Token(TokenType.KEYWORD, word));
+                if (KEYWORDS.containsKey(word)) {
+                    tokens.add(new Token(KEYWORDS.get(word), word));
                 } else {
                     tokens.add(new Token(TokenType.IDENTIFIER, word));
                 }
@@ -106,17 +102,19 @@ public class Lexer {
                 tokens.add(new Token(TokenType.LITERAL, sb.toString()));
             }
             // Handle operators
-            else if (isOperator(input, i)) {
-                StringBuilder sb = new StringBuilder();
-                while (i < length && isOperator(input, i)) {
-                    sb.append(input.charAt(i));
+            else if (isOperatorStart(current)) {
+                String op = String.valueOf(current);
+                if (OPERATORS.containsKey(op)) {
+                    tokens.add(new Token(OPERATORS.get(op), op));
+                    i++;
+                } else {
+                    tokens.add(new Token(TokenType.ERROR, "Unknown operator '" + current + "' at index " + i));
                     i++;
                 }
-                tokens.add(new Token(TokenType.OPERATOR, sb.toString()));
             }
             // Handle delimiters
-            else if (DELIMITERS.contains(current)) {
-                tokens.add(new Token(TokenType.DELIMITER, Character.toString(current)));
+            else if (DELIMITERS.containsKey(current)) {
+                tokens.add(new Token(DELIMITERS.get(current), String.valueOf(current)));
                 i++;
             }
             // Handle unrecognized characters (lexical errors)
@@ -126,12 +124,57 @@ public class Lexer {
             }
         }
 
+        tokens.add(new Token(TokenType.EOF, ""));
         return tokens;
     }
 
-    // Helper method to check if the current part of the string is an operator
-    private static boolean isOperator(String input, int index) {
-        return OPERATORS.contains(String.valueOf(input.charAt(index))) ||
-                (index < input.length() - 1 && OPERATORS.contains(input.substring(index, index + 2)));
+    // Check if a character can be the start of an operator
+    private static boolean isOperatorStart(char c) {
+        return OPERATORS.containsKey(String.valueOf(c));
+    }
+
+    // Print the list of tokens
+    private static void printTokens(List<Token> tokens) {
+        for (Token token : tokens) {
+            System.out.println(token);
+        }
+    }
+
+    // Main function
+    public static void main(String[] args) {
+        // Test inputs
+        List<String> inputs = Arrays.asList(
+                // Example 1: Simple assignment statement
+                "x = a + 5;",
+
+                // Example 2: Simple if statement
+                "if (x) { y = x - 1; }",
+
+                // Example 3: Nested expressions
+                "z = (x + y) * (a - b);",
+
+                // Example 4: Input with errors
+                "if x { y = 2; }",
+
+                // Example 5: Multiple statements
+                "{ x = 1; y = x + 2; }"
+        );
+
+        // Scan and parse each input
+        for (int i = 0; i < inputs.size(); i++) {
+            System.out.println("Example " + (i + 1) + " Tokens:");
+            List<Token> tokens = scan(inputs.get(i));
+            printTokens(tokens);
+
+            System.out.println("Example " + (i + 1) + " AST:");
+            Parser parser = new Parser(tokens);
+            try {
+                ASTNode ast = parser.parseProgram();
+                ast.print(""); // Implement the print method in ASTNode
+            } catch (Parser.ParseException e) {
+                System.out.println(e.getMessage());
+            }
+            System.out.println(); // Separate different examples
+        }
     }
 }
