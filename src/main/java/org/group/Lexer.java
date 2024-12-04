@@ -3,7 +3,7 @@ package org.group;
 import java.util.*;
 
 public class Lexer {
-    // Define token types
+    // Define token gitypes
     enum TokenType {
         // Keywords
         IF,
@@ -140,7 +140,7 @@ public class Lexer {
         }
     }
 
-    // Main function
+
     public static void main(String[] args) {
         // Test inputs
         List<String> inputs = Arrays.asList(
@@ -168,13 +168,27 @@ public class Lexer {
 
             System.out.println("Example " + (i + 1) + " AST:");
             Parser parser = new Parser(tokens);
+            ASTNode ast = null;
             try {
-                ASTNode ast = parser.parseProgram();
+                ast = parser.parseProgram();
                 ast.print(""); // Implement the print method in ASTNode
             } catch (Parser.ParseException e) {
                 System.out.println(e.getMessage());
+                continue;
             }
+
+            // Code Generation
+            CodeGenerator codeGenerator = new CodeGenerator();
+            List<String> code = codeGenerator.generate(ast);
+
+            // Output generated code
+            System.out.println("Generated Code:");
+            for (String line : code) {
+                System.out.println(line);
+            }
+
             System.out.println(); // Separate different examples
         }
     }
+
 }
