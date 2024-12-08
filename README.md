@@ -6,7 +6,7 @@
 ### Sample Output
 Below is a screenshot of the lexer program in action. You can refer to it for a basic understanding of the workflow.
 
-![Lexer Sample Output](img.png)
+![](img.png)
 
 ### Project description
 **Custom Lexer for Programming Language**
@@ -18,6 +18,333 @@ This project implements a custom lexer in Java, designed to process input source
 - **Tokenization of Source Code**: The lexer breaks down input source code into distinct token types, such as keywords, identifiers, literals, operators, and delimiters.
 - **State Transitions**: Implements finite automata for lexical analysis to manage state transitions.
 - **Error Handling**: Detects and reports lexical errors, including unrecognized tokens.
+
+
+
+### Youtube link
+
+https://youtu.be/JT6W2vl6qjM
+
+## Project Structure
+
+```
+├── org
+│   └── group
+│       ├── ASTNode.java
+│       ├── CodeGenerator.java
+│       ├── Lexer.java
+│       ├── Parser.java
+│       └── [Other Java files if any]
+├── run_compiler.sh
+└── README.md
+```
+
+## Sample Input Programs and Expected Outputs
+
+### Sample Program 1: Simple Assignment Statement
+
+**Input:**
+
+```plaintext
+x = a + 5;
+```
+
+**Tokens:**
+
+```
+<IDENTIFIER, 'x'>
+<ASSIGN, '='>
+<IDENTIFIER, 'a'>
+<PLUS, '+'>
+<LITERAL, '5'>
+<SEMICOLON, ';'>
+<EOF, ''>
+```
+
+**AST:**
+
+```
+Program
+  Assignment
+    Identifier: x
+    Expression: 
+      BinaryExpression (PLUS)
+        Left: 
+          Identifier: a
+        Right: 
+          Literal: 5
+```
+
+**Generated Code:**
+
+```plaintext
+t0 = 5
+t1 = a + t0
+x = t1
+```
+
+### Sample Program 2: Simple If Statement
+
+**Input:**
+
+```plaintext
+if (x) { y = x - 1; }
+```
+
+**Tokens:**
+
+```
+<IF, 'if'>
+<LPAREN, '('>
+<IDENTIFIER, 'x'>
+<RPAREN, ')'>
+<LBRACE, '{'>
+<IDENTIFIER, 'y'>
+<ASSIGN, '='>
+<IDENTIFIER, 'x'>
+<MINUS, '-'>
+<LITERAL, '1'>
+<SEMICOLON, ';'>
+<RBRACE, '}'>
+<EOF, ''>
+```
+
+**AST:**
+
+```
+Program
+  IfStatement
+    Condition: 
+      Identifier: x
+    Then: 
+      Block
+        Assignment
+          Identifier: y
+          Expression: 
+            BinaryExpression (MINUS)
+              Left: 
+                Identifier: x
+              Right: 
+                Literal: 1
+```
+
+**Generated Code:**
+
+```plaintext
+ifFalse x goto else_0
+t1 = 1
+t2 = x - t1
+y = t2
+goto endif_1
+else_0:
+endif_1:
+```
+
+### Sample Program 3: Nested Expressions
+
+**Input:**
+
+```plaintext
+z = (x + y) * (a - b);
+```
+
+**Tokens:**
+
+```
+<IDENTIFIER, 'z'>
+<ASSIGN, '='>
+<LPAREN, '('>
+<IDENTIFIER, 'x'>
+<PLUS, '+'>
+<IDENTIFIER, 'y'>
+<RPAREN, ')'>
+<MULTIPLY, '*'>
+<LPAREN, '('>
+<IDENTIFIER, 'a'>
+<MINUS, '-'>
+<IDENTIFIER, 'b'>
+<RPAREN, ')'>
+<SEMICOLON, ';'>
+<EOF, ''>
+```
+
+**AST:**
+
+```
+Program
+  Assignment
+    Identifier: z
+    Expression: 
+      BinaryExpression (MULTIPLY)
+        Left: 
+          BinaryExpression (PLUS)
+            Left: 
+              Identifier: x
+            Right: 
+              Identifier: y
+        Right: 
+          BinaryExpression (MINUS)
+            Left: 
+              Identifier: a
+            Right: 
+              Identifier: b
+```
+
+**Generated Code:**
+
+```plaintext
+t0 = x + y
+t1 = a - b
+t2 = t0 * t1
+z = t2
+```
+
+### Sample Program 4: Input with Errors
+
+**Input:**
+
+```plaintext
+if x { y = 2; }
+```
+
+**Output:**
+
+```
+Parse error at token 'x': Expected '(' after 'if'
+```
+
+### Sample Program 5: Multiple Statements
+
+**Input:**
+
+```plaintext
+{ x = 1; y = x + 2; }
+```
+
+**Tokens:**
+
+```
+<LBRACE, '{'>
+<IDENTIFIER, 'x'>
+<ASSIGN, '='>
+<LITERAL, '1'>
+<SEMICOLON, ';'>
+<IDENTIFIER, 'y'>
+<ASSIGN, '='>
+<IDENTIFIER, 'x'>
+<PLUS, '+'>
+<LITERAL, '2'>
+<SEMICOLON, ';'>
+<RBRACE, '}'>
+<EOF, ''>
+```
+
+**AST:**
+
+```
+Program
+  Block
+    Assignment
+      Identifier: x
+      Expression: 
+        Literal: 1
+    Assignment
+      Identifier: y
+      Expression: 
+        BinaryExpression (PLUS)
+          Left: 
+            Identifier: x
+          Right: 
+            Literal: 2
+```
+
+**Generated Code:**
+
+```plaintext
+t0 = 1
+x = t0
+t1 = 2
+t2 = x + t1
+y = t2
+```
+
+
+
+
+
+
+
+##  Detailed Description of Each Step
+
+### 1. Lexical Analysis (Scanning)
+
+- **File:** `Lexer.java`
+- **Purpose:** Reads the input source code and converts it into a list of tokens.
+- Process:
+  - Defines token types (keywords, operators, delimiters, identifiers, literals).
+  - Uses regular expressions and character checks to identify tokens.
+  - Handles errors for unrecognized tokens.
+- **Output:** A list of tokens representing the input source code.
+
+### 2. Parsing
+
+- **File:** `Parser.java`
+- **Purpose:** Parses the list of tokens to build an Abstract Syntax Tree (AST).
+- Process:
+  - Implements recursive descent parsing methods for expressions, statements, and program structures.
+  - Handles grammatical rules of the language.
+  - Throws parse exceptions for syntax errors.
+- **Output:** An AST representing the hierarchical structure of the source code.
+
+### 3. Abstract Syntax Tree (AST) Nodes
+
+- **File:** `ASTNode.java`
+
+- **Purpose:** Defines the various node types used in the AST.
+
+- Node Types:
+
+  - `ProgramNode`
+
+  - ```
+    StatementNode
+    ```
+
+     and its subclasses:
+
+    - `AssignmentNode`
+    - `IfStatementNode`
+    - `BlockNode`
+
+  - ```
+    ExpressionNode
+    ```
+
+     and its subclasses:
+
+    - `BinaryExpressionNode`
+    - `IdentifierNode`
+    - `LiteralNode`
+
+- Functionality:
+
+  - Each node has a `print` method for debugging and visualization.
+  - Nodes are used by the parser and code generator.
+
+### 4. Code Generation
+
+- **File:** `CodeGenerator.java`
+- **Purpose:** Traverses the AST to generate three-address code.
+- Process:
+  - Maintains a temporary variable counter and a list of generated code lines.
+  - Implements methods to handle each type of AST node.
+    - **ProgramNode:** Generates code for each statement.
+    - **AssignmentNode:** Generates code for expressions and assigns the result.
+    - **IfStatementNode:** Generates conditional branching code with labels.
+    - **BinaryExpressionNode:** Generates code for binary operations using temporary variables.
+    - **IdentifierNode & LiteralNode:** Handles variables and constants.
+  - Simplifies expressions where possible and removes redundant code.
+- **Output:** A list of three-address code instructions representing the input program.
 
 ### Prerequisites
 
@@ -297,332 +624,6 @@ The `parse` function in this `Parser` class is a top-down parser that analyzes a
 ### Error Handling
 
 If unexpected tokens are encountered during parsing, the `error` function generates a `ParseException`, which interrupts parsing and indicates where the error occurred.
-
-### Youtube link
-https://youtu.be/1_NT4my9zGs
-
-## Project Structure
-
-```
-├── org
-│   └── group
-│       ├── ASTNode.java
-│       ├── CodeGenerator.java
-│       ├── Lexer.java
-│       ├── Parser.java
-│       └── [Other Java files if any]
-├── run_compiler.sh
-└── README.md
-```
-
-
-
-## Detailed Description of Each Step
-
-### 1. Lexical Analysis (Scanning)
-
-- **File:** `Lexer.java`
-- **Purpose:** Reads the input source code and converts it into a list of tokens.
-- Process:
-  - Defines token types (keywords, operators, delimiters, identifiers, literals).
-  - Uses regular expressions and character checks to identify tokens.
-  - Handles errors for unrecognized tokens.
-- **Output:** A list of tokens representing the input source code.
-
-### 2. Parsing
-
-- **File:** `Parser.java`
-- **Purpose:** Parses the list of tokens to build an Abstract Syntax Tree (AST).
-- Process:
-  - Implements recursive descent parsing methods for expressions, statements, and program structures.
-  - Handles grammatical rules of the language.
-  - Throws parse exceptions for syntax errors.
-- **Output:** An AST representing the hierarchical structure of the source code.
-
-### 3. Abstract Syntax Tree (AST) Nodes
-
-- **File:** `ASTNode.java`
-
-- **Purpose:** Defines the various node types used in the AST.
-
-- Node Types:
-
-  - `ProgramNode`
-
-  - ```
-    StatementNode
-    ```
-
-     and its subclasses:
-
-    - `AssignmentNode`
-    - `IfStatementNode`
-    - `BlockNode`
-
-  - ```
-    ExpressionNode
-    ```
-
-     and its subclasses:
-
-    - `BinaryExpressionNode`
-    - `IdentifierNode`
-    - `LiteralNode`
-
-- Functionality:
-
-  - Each node has a `print` method for debugging and visualization.
-  - Nodes are used by the parser and code generator.
-
-### 4. Code Generation
-
-- **File:** `CodeGenerator.java`
-- **Purpose:** Traverses the AST to generate three-address code.
-- Process:
-  - Maintains a temporary variable counter and a list of generated code lines.
-  - Implements methods to handle each type of AST node.
-    - **ProgramNode:** Generates code for each statement.
-    - **AssignmentNode:** Generates code for expressions and assigns the result.
-    - **IfStatementNode:** Generates conditional branching code with labels.
-    - **BinaryExpressionNode:** Generates code for binary operations using temporary variables.
-    - **IdentifierNode & LiteralNode:** Handles variables and constants.
-  - Simplifies expressions where possible and removes redundant code.
-- **Output:** A list of three-address code instructions representing the input program.
-
-
-
-## Sample Input Programs and Expected Outputs
-
-### Sample Program 1: Simple Assignment Statement
-
-**Input:**
-
-```plaintext
-x = a + 5;
-```
-
-**Tokens:**
-
-```
-<IDENTIFIER, 'x'>
-<ASSIGN, '='>
-<IDENTIFIER, 'a'>
-<PLUS, '+'>
-<LITERAL, '5'>
-<SEMICOLON, ';'>
-<EOF, ''>
-```
-
-**AST:**
-
-```
-Program
-  Assignment
-    Identifier: x
-    Expression: 
-      BinaryExpression (PLUS)
-        Left: 
-          Identifier: a
-        Right: 
-          Literal: 5
-```
-
-**Generated Code:**
-
-```plaintext
-t0 = 5
-t1 = a + t0
-x = t1
-```
-
-### Sample Program 2: Simple If Statement
-
-**Input:**
-
-```plaintext
-if (x) { y = x - 1; }
-```
-
-**Tokens:**
-
-```
-<IF, 'if'>
-<LPAREN, '('>
-<IDENTIFIER, 'x'>
-<RPAREN, ')'>
-<LBRACE, '{'>
-<IDENTIFIER, 'y'>
-<ASSIGN, '='>
-<IDENTIFIER, 'x'>
-<MINUS, '-'>
-<LITERAL, '1'>
-<SEMICOLON, ';'>
-<RBRACE, '}'>
-<EOF, ''>
-```
-
-**AST:**
-
-```
-Program
-  IfStatement
-    Condition: 
-      Identifier: x
-    Then: 
-      Block
-        Assignment
-          Identifier: y
-          Expression: 
-            BinaryExpression (MINUS)
-              Left: 
-                Identifier: x
-              Right: 
-                Literal: 1
-```
-
-**Generated Code:**
-
-```plaintext
-ifFalse x goto else_0
-t1 = 1
-t2 = x - t1
-y = t2
-goto endif_1
-else_0:
-endif_1:
-```
-
-### Sample Program 3: Nested Expressions
-
-**Input:**
-
-```plaintext
-z = (x + y) * (a - b);
-```
-
-**Tokens:**
-
-```
-<IDENTIFIER, 'z'>
-<ASSIGN, '='>
-<LPAREN, '('>
-<IDENTIFIER, 'x'>
-<PLUS, '+'>
-<IDENTIFIER, 'y'>
-<RPAREN, ')'>
-<MULTIPLY, '*'>
-<LPAREN, '('>
-<IDENTIFIER, 'a'>
-<MINUS, '-'>
-<IDENTIFIER, 'b'>
-<RPAREN, ')'>
-<SEMICOLON, ';'>
-<EOF, ''>
-```
-
-**AST:**
-
-```
-Program
-  Assignment
-    Identifier: z
-    Expression: 
-      BinaryExpression (MULTIPLY)
-        Left: 
-          BinaryExpression (PLUS)
-            Left: 
-              Identifier: x
-            Right: 
-              Identifier: y
-        Right: 
-          BinaryExpression (MINUS)
-            Left: 
-              Identifier: a
-            Right: 
-              Identifier: b
-```
-
-**Generated Code:**
-
-```plaintext
-t0 = x + y
-t1 = a - b
-t2 = t0 * t1
-z = t2
-```
-
-### Sample Program 4: Input with Errors
-
-**Input:**
-
-```plaintext
-if x { y = 2; }
-```
-
-**Output:**
-
-```
-Parse error at token 'x': Expected '(' after 'if'
-```
-
-### Sample Program 5: Multiple Statements
-
-**Input:**
-
-```plaintext
-{ x = 1; y = x + 2; }
-```
-
-**Tokens:**
-
-```
-<LBRACE, '{'>
-<IDENTIFIER, 'x'>
-<ASSIGN, '='>
-<LITERAL, '1'>
-<SEMICOLON, ';'>
-<IDENTIFIER, 'y'>
-<ASSIGN, '='>
-<IDENTIFIER, 'x'>
-<PLUS, '+'>
-<LITERAL, '2'>
-<SEMICOLON, ';'>
-<RBRACE, '}'>
-<EOF, ''>
-```
-
-**AST:**
-
-```
-Program
-  Block
-    Assignment
-      Identifier: x
-      Expression: 
-        Literal: 1
-    Assignment
-      Identifier: y
-      Expression: 
-        BinaryExpression (PLUS)
-          Left: 
-            Identifier: x
-          Right: 
-            Literal: 2
-```
-
-**Generated Code:**
-
-```plaintext
-t0 = 1
-x = t0
-t1 = 2
-t2 = x + t1
-y = t2
-```
-
-
-
-## 
 
 
 
